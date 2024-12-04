@@ -266,7 +266,9 @@ namespace AoC2024.Days
 
         private int safetyCheck()
         {
-            
+            //make this redo the first part of the puzzle against each unsafe check with only 1 error and the frist number removed
+            int tempInt = 0;
+            return tempInt;
         }
     }
 }
