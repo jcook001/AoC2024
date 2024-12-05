@@ -42,10 +42,11 @@ namespace AoC2024.Days
             }
 
             int bookReadyCount = 0;
+            List<string> failedBooks = new List<string>();
 
             foreach (string s in pagesRaw)
             {
-                Console.WriteLine($"{s}");
+                //Console.WriteLine($"{s}");
                 bool isBookReady = true;
                 List<int> pages = new List<int>();
 
@@ -69,8 +70,9 @@ namespace AoC2024.Days
 
                         if(earlyNumberIndex > lateNumberIndex)
                         {
-                            Console.WriteLine($"Book failed on rule {rule}");
+                            //Console.WriteLine($"Book failed on rule {rule}");
                             isBookReady = false;
+                            failedBooks.Add(s);
                             break;
                         }
                     }
@@ -80,7 +82,7 @@ namespace AoC2024.Days
                 {
                     double middlepage = pages.Count / 2;
                     bookReadyCount += pages[(int)Math.Ceiling(middlepage)];
-                    Console.WriteLine("book is ready. Middle page is " + pages[(int)Math.Ceiling(middlepage)]);
+                    //Console.WriteLine("book is ready. Middle page is " + pages[(int)Math.Ceiling(middlepage)]);
                 }
 
             }
@@ -106,9 +108,58 @@ namespace AoC2024.Days
             /////////////////* Part 2 *//////////////////
             /////////////////////////////////////////////
 
+            int correctedBookCount = 0;
 
+            foreach(string book in failedBooks)
+            {
+                Console.WriteLine($"{book}");
+                List<int> pages = new List<int>();
+                String[] tempStringArray = book.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string tempString in tempStringArray)
+                {
+                    pages.Add(int.Parse(tempString));
+                }
+                
+                bool needsTesting = true;
 
-            int answer2 = 0;
+                while (needsTesting)
+                {
+                    needsTesting = false;
+                    foreach (string rule in rulesRaw)
+                    {
+                        String[] ruleNumbers = rule.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                        int earlyNumber = int.Parse(ruleNumbers[0]);
+                        int lateNumber = int.Parse(ruleNumbers[1]);
+
+                        if (pages.Contains(earlyNumber) && pages.Contains(lateNumber))
+                        {
+                            int earlyNumberIndex = pages.IndexOf(earlyNumber);
+                            int lateNumberIndex = pages.IndexOf(lateNumber);
+
+                            if (earlyNumberIndex > lateNumberIndex)
+                            {
+                                //Console.WriteLine($"Book failed on rule {rule}, reordering pages...");
+                                pages.RemoveAt(earlyNumberIndex);
+                                pages.Insert(lateNumberIndex, earlyNumber);
+                                needsTesting = true;
+                            }
+                        }
+                    }
+                }
+
+                Console.Write("new order: ");
+                foreach (int i in pages)
+                {
+                    Console.Write($"{i}, ");
+                }
+                Console.Write("\n");
+
+                double middlepage = pages.Count / 2;
+                correctedBookCount += pages[(int)Math.Ceiling(middlepage)]; 
+
+            }
+
+            int answer2 = correctedBookCount;
 
             // Set the Foreground color to yellow  - helpful for highlighting answer
             Console.ForegroundColor
