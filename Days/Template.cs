@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AoC2024.Days
 {
+    [SupportedOSPlatform("windows7.0")] //Added to stop copy to clipboard function complaining
     internal class Template
     {
         [STAThread]
@@ -35,7 +37,7 @@ namespace AoC2024.Days
             // Set the Foreground color to yellow - helpful for highlighting answer
             Console.ForegroundColor
                 = ConsoleColor.Yellow;
-            Console.WriteLine("Part 1: The total difference of all values is {0}", answer);
+            Console.WriteLine("Part 1 answer is {0}", answer);
             if (answer != 0)
             {
                 Clipboard.SetText(answer.ToString());
@@ -57,9 +59,9 @@ namespace AoC2024.Days
             // Set the Foreground color to yellow  - helpful for highlighting answer
             Console.ForegroundColor
                 = ConsoleColor.Yellow;
-            Console.WriteLine("Part2: Similarity Score = " + answer2);
             if (answer2 != 0)
             {
+                Console.WriteLine("Part2 answer is = " + answer2);
                 Clipboard.SetText(answer2.ToString());
                 Console.WriteLine("Answer copied to clipboard!");
             }
