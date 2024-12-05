@@ -28,8 +28,8 @@ namespace AoC2024
             // Get the current directory (bin\Debug or bin\Release)
             string basePath = AppDomain.CurrentDomain.BaseDirectory;
 
-            // Move up two levels to the project root
-            string projectRoot = Path.Combine(basePath, "..", "..");
+            // Move up three levels to the project root
+            string projectRoot = Path.Combine(basePath, "..", "..", "..");
 
             // Construct the full path to the input file
             string filePath = Path.Combine(projectRoot, "Inputs", $"Day{dayNumber}.txt");
