@@ -79,11 +79,13 @@ namespace AoC2024.Days
             regex = new Regex(pattern2);
             int totalMultiplication2 = 0;
 
+            bool shouldProcess = true; //despite there being multiple input lines, t's only THE VERY START that is
+                                       // treated as do() by default
+
             foreach (string s in inputArray)
             { 
                 MatchCollection matches = regex.Matches(s);
-
-                bool shouldProcess = true;
+                
                 Console.ForegroundColor = ConsoleColor.Green;
 
                 foreach (Match match in matches)
@@ -132,8 +134,6 @@ namespace AoC2024.Days
                 Console.WriteLine("Part2: Multiplication total with dos and don'ts accounted for = " + answer2);
                 Clipboard.SetText(answer2.ToString());
                 Console.WriteLine("Answer copied to clipboard!");
-
-                // 105264641 is too high!
             }
 
             Console.WriteLine("Press any key to close");
