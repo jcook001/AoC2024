@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.Pkcs;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,79 +27,19 @@ namespace AoC2024.Days
                 return;
             }
 
-            List<int> levels = new List<int>();
             int safeCount_part1 = 0;
 
             foreach (string s in input)
             {
-                levels.Clear();
+                List<int> levels = new List<int>();
                 String[] tempStringArray = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string t in tempStringArray)
                 {
                     levels.Add(int.Parse(t));
                 }
 
-                //determine if increasing
-                bool? isIncreasing = null;
-                bool isSafe = true;
-                int tempInt = levels[0];
-                for (int i = 1; i < levels.Count;  i++ )
-                {
-                    if (levels[i] - tempInt > 0)
-                    {
-                        //it's increasing
-                        if(isIncreasing == null)
-                        {
-                            isIncreasing = true;
-                        }
-                        else if (isIncreasing == false)
-                        {
-                            //not safe
-                            isSafe = false;
-                            break;
-                        }
-
-                        if(levels[i] - tempInt > 3)
-                        {
-                            //not safe
-                            isSafe = false;
-                            break;
-                        }
-                    }
-                    else if (levels[i] - tempInt < 0)
-                    {
-                        //it's decreasing
-                        if (isIncreasing == null)
-                        {
-                            isIncreasing = false;
-                        }
-                        else if (isIncreasing == true)
-                        {
-                            //not safe
-                            isSafe = false;
-                            break;
-                        }
-
-                        if (levels[i] - tempInt < -3)
-                        {
-                            //not safe
-                            isSafe = false;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        //0 difference
-                        //not safe
-                        isSafe = false;
-                        break;
-                    }
-
-                    tempInt = levels[i];
-                }
-
                 //Console.WriteLine("string is " + s);
-                if (isSafe)
+                if (isSafe(levels))
                 {
                     //Console.WriteLine("String is safe");
                     safeCount_part1++;
@@ -105,10 +48,6 @@ namespace AoC2024.Days
                 {
                     //Console.WriteLine("String is not safe");
                 }
-
-                //reset values for next string
-                isIncreasing = null;
-                isSafe = true;
 
             }
 
@@ -137,7 +76,7 @@ namespace AoC2024.Days
 
             foreach (string s in input)
             {
-                levels.Clear();
+                List<int> levels = new List<int>();
                 String[] tempStringArray = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string t in tempStringArray)
                 {
@@ -145,108 +84,45 @@ namespace AoC2024.Days
                 }
 
                 Console.WriteLine("string is " + s);
-
-                //determine if increasing
-                bool? isIncreasing = null;
-                int levelUnsafeCount = 0;
-                int tempInt = levels[0];
-                List<int> valuesRemoved = new List<int>();
-                for (int i = 1; i < levels.Count; i++)
+                if (isSafe(levels))
                 {
-                    if (levels[i] - tempInt > 0)
-                    {
-                        //it's increasing
-                        if (isIncreasing == null)
-                        {
-                            isIncreasing = true;
-                        }
-                        else if (isIncreasing == false)
-                        {
-                            //not safe
-                            levelUnsafeCount++;
-                            valuesRemoved.Add(levels[i]);
-                            continue;
-                        }
-
-                        if (levels[i] - tempInt > 3)
-                        {
-                            //not safe
-                            levelUnsafeCount++;
-                            valuesRemoved.Add(levels[i]);
-                            continue;
-                        }
-                    }
-                    else if (levels[i] - tempInt < 0)
-                    {
-                        //it's decreasing
-                        if (isIncreasing == null)
-                        {
-                            isIncreasing = false;
-                        }
-                        else if (isIncreasing == true)
-                        {
-                            //not safe
-                            levelUnsafeCount++;
-                            valuesRemoved.Add(levels[i]);
-                            continue;
-                        }
-
-                        if (levels[i] - tempInt < -3)
-                        {
-                            //not safe
-                            levelUnsafeCount++;
-                            valuesRemoved.Add(levels[i]);
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        //0 difference
-                        //not safe
-                        levelUnsafeCount++;
-                        valuesRemoved.Add(levels[i]);
-                        continue;
-                    }
-
-                    tempInt = levels[i];
-                }
-
-                if (levelUnsafeCount == 0)
-                {
-                    Console.WriteLine("String is safe, no removals");
+                    Console.WriteLine("String is safe without modifications");
                     safeCount_part2++;
-                }
-                else if (levelUnsafeCount >= 1)
-                {
-                    string isSafe = "";
-                    if(levelUnsafeCount == 1)
-                    {
-                        isSafe = "safe";
-                        safeCount_part2++;
-                    }
-                    else
-                    {
-                        isSafe = "not safe";
-                    }
-                    Console.WriteLine("String is {1}, {0} removal(s)", levelUnsafeCount, isSafe);
-                    Console.WriteLine("Values removed: ");
-                    foreach(int i in valuesRemoved)
-                    {
-                        Console.Write(i + ", ");
-                    }
-                    Console.Write("\n");
                 }
                 else
                 {
-                    Console.WriteLine("String is not safe");
+                    Console.WriteLine("String is not safe, going to try again with numbers omitted");
+                    //try again with each number omitted in turn
+                    for (int numberPosToRemove = 0; numberPosToRemove < levels.Count; numberPosToRemove++)
+                    {
+                        List<int> intsWithNumberRemoved = new List<int>();
+                        for (int x = 0; x < levels.Count; x++)
+                        {
+                            if (x != numberPosToRemove)
+                            {
+                                intsWithNumberRemoved.Add(levels[x]);
+                            }
+                        }
+
+                        Console.Write("new string to check is: ");
+                        foreach (int i in intsWithNumberRemoved)
+                        {
+                            Console.Write(i + ", ");
+                        }
+                        Console.Write("\n");
+                        
+                        if (isSafe(intsWithNumberRemoved))
+                        {
+                            Console.WriteLine("string is safe, moving on...");
+                            safeCount_part2++;
+                            break;
+                        }
+                    }
+                    Console.WriteLine("string is still not safe");
                 }
 
-                //reset values for next string
-                isIncreasing = null;
-                levelUnsafeCount = 0;
-                valuesRemoved.Clear();
-
             }
+
 
             int answer2 = safeCount_part2;
 
@@ -264,11 +140,76 @@ namespace AoC2024.Days
             Console.ReadKey();
         }
 
-        private int safetyCheck()
+        private static bool isSafe(List<int> levels)
         {
-            //make this redo the first part of the puzzle against each unsafe check with only 1 error and the frist number removed
-            int tempInt = 0;
-            return tempInt;
+            //determine if increasing
+            bool? isIncreasing = null;
+            bool isSafe = true;
+            int tempInt = levels[0];
+            for (int i = 1; i < levels.Count; i++)
+            {
+                if (levels[i] - tempInt > 0)
+                {
+                    //it's increasing
+                    if (isIncreasing == null)
+                    {
+                        isIncreasing = true;
+                    }
+                    else if (isIncreasing == false)
+                    {
+                        //not safe
+                        isSafe = false;
+                        break;
+                    }
+
+                    if (levels[i] - tempInt > 3)
+                    {
+                        //not safe
+                        isSafe = false;
+                        break;
+                    }
+                }
+                else if (levels[i] - tempInt < 0)
+                {
+                    //it's decreasing
+                    if (isIncreasing == null)
+                    {
+                        isIncreasing = false;
+                    }
+                    else if (isIncreasing == true)
+                    {
+                        //not safe
+                        isSafe = false;
+                        break;
+                    }
+
+                    if (levels[i] - tempInt < -3)
+                    {
+                        //not safe
+                        isSafe = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    //0 difference
+                    //not safe
+                    isSafe = false;
+                    break;
+                }
+
+                tempInt = levels[i];
+            }
+
+            if (isSafe)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
+
     }
 }
