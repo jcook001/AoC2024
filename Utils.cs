@@ -46,5 +46,33 @@ namespace AoC2024
             }
             
         }
+
+        public static List<char[]> ReadInputAsListCharArray()
+        {
+            // Same logic as before to read the input file
+            var stackTrace = new StackTrace();
+            var callingClass = stackTrace.GetFrame(1)?.GetMethod()?.DeclaringType?.Name;
+
+            if (callingClass == null || !callingClass.StartsWith("Day"))
+            {
+                throw new InvalidOperationException("Could not determine the calling class or invalid class name.");
+            }
+
+            var dayNumber = callingClass.Substring(3);
+            string basePath = AppDomain.CurrentDomain.BaseDirectory;
+            string projectRoot = Path.Combine(basePath, "..", "..", "..");
+            string filePath = Path.Combine(projectRoot, "Inputs", $"Day{dayNumber}.txt");
+
+            if (File.Exists(filePath))
+            {
+                return File.ReadAllLines(filePath).Select(line => line.ToCharArray()).ToList();
+            }
+            else
+            {
+                Console.WriteLine("No input file found!");
+                return null;
+            }
+        }
+
     }
 }
